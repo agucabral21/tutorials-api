@@ -10,7 +10,7 @@ describe('Test status endpoint.', () => {
       .get('/status')
       .set('Accept', 'application/json')
       .then((response) => {
-        expect(response.statusCode).toBe(201);
+        expect(response.statusCode).toBe(200);
         done();
       });
   });
