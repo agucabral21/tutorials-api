@@ -9,12 +9,6 @@
     "eslint": "eslint \"**/*.js\"",
     "prepare": "npx husky install"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run eslint",
-      "pre-push": "npm test"
-    }
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/agucabral21/tutorials-api.git"
