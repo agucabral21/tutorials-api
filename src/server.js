@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 
-const test = '';
+const tesst = '';
 dotenv.config();
 
 const { app } = require('./config');
