@@ -1,3 +1,4 @@
+const TutorialModel = require('./Tutorial');
 const UserModel = require('./User');
 
-module.exports = { UserModel };
+module.exports = { TutorialModel, UserModel };
