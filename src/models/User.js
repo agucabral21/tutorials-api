@@ -28,7 +28,7 @@ const UserModel = (sequelize, DataTypes) => {
     { timestamps: false }
   );
 
-  User.prototype.validPassword = async function validPassword(password) {
+  User.prototype.validPassword = function validPassword(password) {
     // basic password validation without encryption
     // TODO: add bcrypt
     return password === this.password;
