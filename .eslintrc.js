@@ -5,8 +5,8 @@ module.exports = {
     es2021: true,
     jest: true,
   },
-  extends: ['airbnb-base'],
-  plugins: ['import'],
+  extends: ['airbnb-base', 'prettier'],
+  plugins: ['import', 'prettier'],
   parserOptions: {
     ecmaVersion: 'latest',
   },
