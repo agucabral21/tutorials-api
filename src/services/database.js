@@ -7,9 +7,6 @@ const sequelize = new Sequelize(config);
 
 const User = UserModel(sequelize, DataTypes);
 
-// eslint-disable-next-line no-return-await
-(async () => await sequelize.sync({ alter: true }))();
-
 module.exports = {
   sequelize,
   User,
