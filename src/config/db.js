@@ -11,7 +11,7 @@ const configurations = {
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: 'tutorials_test',
-    host: 'localhost',
+    host: process.env.DB_HOST,
     dialect: 'mysql',
     logging: false,
   },
