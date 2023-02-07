@@ -1,6 +1,6 @@
 const { generateJWT } = require('../../helpers/jwt-generator');
 const { User } = require('../../services/database');
-const { errorResponse } = require('../../helpers/responses');
+const { errorResponse, okResponse } = require('../../helpers/responses');
 
 async function login(req, res) {
   const { email, password } = req.body;
@@ -13,9 +13,11 @@ async function login(req, res) {
     return res.status(401).send(errorResponse('Incorrect Password.'));
   }
 
-  const jwt = await generateJWT({ user: user.id });
+  const payload = { user: { id: user.id } };
 
-  return res.status(200).send({ jwt });
+  const token = await generateJWT(payload);
+
+  return res.status(200).send(okResponse({ token }));
 }
 
 module.exports = { login };
