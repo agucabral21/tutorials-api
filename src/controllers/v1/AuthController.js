@@ -1,6 +1,6 @@
-const { generateJWT } = require('../helpers/jwt-generator');
-const { User } = require('../services/database');
-const { errorResponse } = require('../helpers/responses');
+const { generateJWT } = require('../../helpers/jwt-generator');
+const { User } = require('../../services/database');
+const { errorResponse } = require('../../helpers/responses');
 
 async function login(req, res) {
   const { email, password } = req.body;
