@@ -1,5 +1,5 @@
-const { okResponse } = require('../helpers/responses');
-const { generateJWT } = require('../helpers/jwt-generator');
+const { okResponse } = require('../../helpers/responses');
+const { generateJWT } = require('../../helpers/jwt-generator');
 
 async function getToken(req, res) {
   const jwt = await generateJWT({ id: req.id }, { expiresIn: '5m' });
