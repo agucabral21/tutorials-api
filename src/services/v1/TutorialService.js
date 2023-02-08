@@ -14,7 +14,6 @@ async function findAll(filters, sort = false) {
   const query = {
     where: { ...parsedFilters },
   };
-  console.log(query);
   if (sort) {
     query.order = [['id', sort]];
   }
