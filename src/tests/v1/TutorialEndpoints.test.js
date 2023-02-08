@@ -197,7 +197,7 @@ describe('Test GET /api/v1/tutorials', () => {
     expect(response.body.errors[0].msg).toBe('Invalid value, allowed values are: asc|desc');
   });
 
-  test('Should return 400 for wrong order value', async () => {
+  test('Should return 404 for no existing tutorials', async () => {
     const payload = { user: { id: 1 } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
@@ -206,7 +206,7 @@ describe('Test GET /api/v1/tutorials', () => {
       .set('Authorization', `Bearer ${tutorialToken}`)
       .query({ title: 'no tutorial with this' })
       .then((res) => res);
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(404);
   });
 });
 
@@ -227,7 +227,7 @@ describe('Test GET /api/v1/tutorials/:id', () => {
     expect(response.body.data.title).toBe(tutorial.title);
   });
 
-  test('Should return 204 for not existing tutorial', async () => {
+  test('Should return 404 for not existing tutorial', async () => {
     const payload = { user: { id: 1 } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
@@ -235,7 +235,7 @@ describe('Test GET /api/v1/tutorials/:id', () => {
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${tutorialToken}`)
       .then((res) => res);
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(404);
   });
 
   test('Should return 400 for invalid id type', async () => {
