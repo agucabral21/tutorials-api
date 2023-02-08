@@ -12,10 +12,10 @@ const jwtValidation = (req, res, next) => {
       req.tokenPayload = decodedToken;
       next();
     } catch (e) {
-      return res.status(401).json(errorResponse({ message: 'Not valid token' }));
+      return res.status(401).json(errorResponse('Not valid token'));
     }
   } else {
-    return res.status(401).json(errorResponse({ message: 'Authorization Token Required' }));
+    return res.status(401).json(errorResponse('Authorization Token Required'));
   }
 };
 
