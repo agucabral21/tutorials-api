@@ -1,10 +1,10 @@
 const { okResponse } = require('../../helpers/responses');
-const { generateJWT } = require('../../helpers/jwt-generator');
+const { generateTutorialToken } = require('../../helpers/jwt-generator');
 const TutorialService = require('../../services/v1/TutorialService');
 
 async function getToken(req, res) {
   const payload = { user: req.tokenPayload.user };
-  const token = await generateJWT(payload, { expiresIn: '5m' });
+  const token = await generateTutorialToken(payload);
   return res.status(200).send(okResponse({ token }));
 }
 
