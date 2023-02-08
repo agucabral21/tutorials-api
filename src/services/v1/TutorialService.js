@@ -35,4 +35,17 @@ async function deleteById(id) {
   return tutorial;
 }
 
-module.exports = { add, findAll, findById, deleteById };
+async function massDelete() {
+  const data = {
+    published_status: 'DELETED',
+    deleted_at: new Date(),
+  };
+  const tutorial = await Tutorial.update(data, {
+    where: {
+      published_status: ['PUBLISHED'],
+    },
+  });
+  return tutorial;
+}
+
+module.exports = { add, findAll, findById, deleteById, massDelete };
