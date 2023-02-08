@@ -80,7 +80,7 @@ describe('Test POST /api/v1/tutorials', () => {
       .send(tutorialData)
       .then((res) => res);
     expect(response.statusCode).toBe(200);
-    expect(response.body.data.tutorial.title).toBe(tutorialData.title);
+    expect(response.body.data.title).toBe(tutorialData.title);
   });
 
   test('Should return 400 error for invalid url', async () => {
@@ -205,8 +205,6 @@ describe('Test GET /api/v1/tutorials', () => {
       .set('Authorization', `Bearer ${tutorialToken}`)
       .query({ title: 'no tutorial with this' })
       .then((res) => res);
-    expect(response.statusCode).toBe(200);
-    expect(response.body.data.size).toBe(0);
-    expect(response.body.data.tutorials.length).toBe(0);
+    expect(response.statusCode).toBe(204);
   });
 });

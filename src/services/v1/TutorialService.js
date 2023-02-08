@@ -21,4 +21,9 @@ async function findAll(filters, sort = false) {
   return tutorial;
 }
 
-module.exports = { add, findAll };
+async function findById(id) {
+  const tutorial = await Tutorial.findOne({ where: { id } });
+  return tutorial;
+}
+
+module.exports = { add, findAll, findById };

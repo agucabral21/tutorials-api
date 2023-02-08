@@ -17,7 +17,7 @@ async function add(req, res) {
     published_status: 'PUBLISHED',
   };
   const tutorial = await TutorialService.add(data);
-  return res.status(200).send(okResponse({ tutorial }));
+  return res.status(200).send(okResponse(tutorial));
 }
 
 async function findAll(req, res) {
@@ -25,7 +25,17 @@ async function findAll(req, res) {
   const filters = { title, description };
 
   const tutorials = await TutorialService.findAll(filters, sort);
+  if (tutorials.length === 0) return res.status(204).send();
   return res.status(200).send(okResponse({ size: tutorials.length, tutorials }));
 }
 
-module.exports = { getToken, add, findAll };
+async function findById(req, res) {
+  const { id } = req.params;
+
+  const tutorial = await TutorialService.findById(id);
+  if (!tutorial) return res.status(204).send();
+
+  return res.status(200).send(okResponse(tutorial));
+}
+
+module.exports = { getToken, add, findAll, findById };
