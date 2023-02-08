@@ -20,4 +20,11 @@ async function add(req, res) {
   return res.status(200).send(okResponse({ tutorial }));
 }
 
-module.exports = { getToken, add };
+async function findAll(req, res) {
+  const { title, description, sort = false } = req.query;
+  const filters = { title, description };
+  const tutorials = await TutorialService.findAll(filters, sort);
+  return res.status(200).send(okResponse({ tutorials }));
+}
+
+module.exports = { getToken, add, findAll };
