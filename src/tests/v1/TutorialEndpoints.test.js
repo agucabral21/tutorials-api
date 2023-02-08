@@ -291,3 +291,30 @@ describe('Test DELETE /api/v1/tutorials/:id', () => {
     expect(response.statusCode).toBe(400);
   });
 });
+
+describe('Test DELETE /api/v1/tutorials/mass_delete', () => {
+  test('Should mass delete tutorials correctly', async () => {
+    await Tutorial.create({ title: 'A1', video_url: 'www.google.com/a1', description: 'A1 desc', published_status: 'PUBLISHED' });
+    await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
+    await Tutorial.create({ title: 'B1 test', video_url: 'www.google.com/B1', description: 'B1 one description', published_status: 'PUBLISHED' });
+    await Tutorial.create({ title: 'C1', video_url: 'www.google.com/a1', description: 'CA1 one description', published_status: 'PUBLISHED' });
+
+    let tutorials = Tutorial.findAll({ where: { published_status: 'PUBLISHED' } });
+
+    expect(tutorials.length).not.toBe(4);
+
+    const payload = { user: { id: 1 } };
+    const token = await generateToken(payload);
+
+    const response = await request(app)
+      .delete(`/api/v1/tutorials/mass_delete`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(204);
+    tutorials = Tutorial.findAll({ where: { published_status: 'PUBLISHED' } });
+    expect(tutorials.length).not.toBe(0);
+    tutorials = Tutorial.findAll({ where: { published_status: 'DELETED' } });
+    expect(tutorials.length).not.toBe(4);
+  });
+});
