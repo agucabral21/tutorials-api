@@ -5,5 +5,6 @@ const jwtValidation = require('../../middlewares/jwtValidation');
 router.use(jwtValidation);
 
 router.get('/token', TutorialController.getToken);
+router.post('/', TutorialController.add);
 
 module.exports = router;
