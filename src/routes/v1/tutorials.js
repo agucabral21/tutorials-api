@@ -8,6 +8,7 @@ router.get('/token', tokenValidation, TutorialController.getToken);
 router.post('/', tutorialTokenValidation, schemaValidate(add), TutorialController.add);
 router.get('/', tokenValidation, schemaValidate(findAll), TutorialController.findAll);
 router.get('/:id', tokenValidation, schemaValidate(findById), TutorialController.findById);
+router.delete('/mass_delete', tokenValidation, TutorialController.massDelete);
 router.delete('/:id', tokenValidation, schemaValidate(deleteById), TutorialController.deleteById);
 
 module.exports = router;

@@ -46,4 +46,9 @@ async function deleteById(req, res) {
   return res.status(204).send();
 }
 
-module.exports = { getToken, add, findAll, findById, deleteById };
+async function massDelete(req, res) {
+  await TutorialService.massDelete();
+  return res.status(204).send();
+}
+
+module.exports = { getToken, add, findAll, findById, deleteById, massDelete };
