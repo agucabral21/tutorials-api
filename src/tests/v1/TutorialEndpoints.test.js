@@ -19,6 +19,7 @@ afterAll(async () => {
   await Tutorial.destroy({
     truncate: { cascade: true, restartIdentity: true },
   });
+
   await sequelize.close();
 });
 
@@ -247,5 +248,46 @@ describe('Test GET /api/v1/tutorials/:id', () => {
       .then((res) => res);
     expect(response.statusCode).toBe(400);
     expect(response.body.errors[0].param).toBe('id');
+  });
+});
+
+describe('Test DELETE /api/v1/tutorials/:id', () => {
+  test('Should return 204 and soft delete tutorial by id', async () => {
+    const tutorial = await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
+
+    const payload = { user: { id: 1 } };
+    const token = await generateToken(payload);
+
+    const response = await request(app)
+      .delete(`/api/v1/tutorials/${tutorial.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(204);
+    await tutorial.reload();
+    expect(tutorial.published_status).toBe('DELETED');
+    expect(tutorial.deleted_at).not.toBe(null);
+  });
+
+  test('Should return 404 for not existing tutorial', async () => {
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+    const response = await request(app)
+      .delete(`/api/v1/tutorials/123`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(404);
+  });
+
+  test('Should return 400 for not existing tutorial', async () => {
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+    const response = await request(app)
+      .delete(`/api/v1/tutorials/asd`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(400);
   });
 });
