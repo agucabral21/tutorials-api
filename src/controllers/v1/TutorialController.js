@@ -38,4 +38,12 @@ async function findById(req, res) {
   return res.status(200).send(okResponse(tutorial));
 }
 
-module.exports = { getToken, add, findAll, findById };
+async function deleteById(req, res) {
+  const { id } = req.params;
+  const tutorial = await TutorialService.findById(id);
+  if (!tutorial) return res.status(404).send();
+  if (tutorial.published_status !== 'DELETED') await TutorialService.deleteById(id);
+  return res.status(204).send();
+}
+
+module.exports = { getToken, add, findAll, findById, deleteById };

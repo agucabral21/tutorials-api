@@ -26,4 +26,13 @@ async function findById(id) {
   return tutorial;
 }
 
-module.exports = { add, findAll, findById };
+async function deleteById(id) {
+  const data = {
+    published_status: 'DELETED',
+    deleted_at: new Date(),
+  };
+  const tutorial = await Tutorial.update(data, { where: { id } });
+  return tutorial;
+}
+
+module.exports = { add, findAll, findById, deleteById };
