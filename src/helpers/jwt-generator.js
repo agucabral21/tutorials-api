@@ -15,4 +15,5 @@ const generateJWT = (payload, secret, options = {}) =>
 const generateToken = (payload) => generateJWT(payload, process.env.PRIVATE_API_KEY);
 
 const generateTutorialToken = (payload) => generateJWT(payload, process.env.PRIVATE_API_KEY_TUTORIALS, { expiresIn: '5m' });
+
 module.exports = { generateToken, generateTutorialToken };

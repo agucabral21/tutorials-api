@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const app = require('../../config/app');
 
 const { Tutorial, sequelize } = require('../../services/database');
-const { generateJWT } = require('../../helpers/jwt-generator');
+const { generateToken, generateTutorialToken } = require('../../helpers/jwt-generator');
 
 dotenv.config();
 
@@ -25,7 +25,7 @@ afterAll(async () => {
 describe('Test GET /api/v1/tutorials/token endpoint.', () => {
   test('Should return a jwt token with expiration', async () => {
     const payload = { user: { id: 1 } };
-    const token = await generateJWT(payload);
+    const token = await generateToken(payload);
 
     const response = await request(app)
       .get('/api/v1/tutorials/token')
@@ -35,7 +35,7 @@ describe('Test GET /api/v1/tutorials/token endpoint.', () => {
 
     expect(response.statusCode).toBe(200);
     const videoToken = response.body.data.token;
-    const decodedToken = jwt.verify(videoToken, process.env.PRIVATE_API_KEY);
+    const decodedToken = jwt.verify(videoToken, process.env.PRIVATE_API_KEY_TUTORIALS);
     expect(decodedToken.user.id).toBe(payload.user.id);
     expect(decodedToken.exp).toBeTruthy();
   });
@@ -61,5 +61,80 @@ describe('Test GET /api/v1/tutorials/token endpoint.', () => {
         expect(response.statusCode).toBe(401);
         expect(response.body.message).toBe('Authorization Token Required');
       });
+  });
+});
+
+describe('Test POST /api/v1/tutorials', () => {
+  test('Should add a tutorial correctly', async () => {
+    const tutorialData = {
+      title: 'Music Tutorial',
+      videoURL: 'www.google.com',
+      description: 'Music Video for Testing',
+    };
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateTutorialToken(payload);
+    const response = await request(app)
+      .post('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .send(tutorialData)
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.tutorial.title).toBe(tutorialData.title);
+  });
+
+  test('Should return 400 error for invalid url', async () => {
+    const tutorialData = {
+      title: 'Music Tutorial',
+      videoURL: 'thisisnotanurl',
+      description: 'Music Video for Testing',
+    };
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateTutorialToken(payload);
+    const response = await request(app)
+      .post('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .send(tutorialData)
+      .then((res) => res);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeTruthy();
+    expect(response.body.errors[0].msg).toBe('Invalid value');
+    expect(response.body.errors[0].param).toBe('videoURL');
+  });
+
+  test('Should return 400 error for non existing title', async () => {
+    const tutorialData = {
+      videoURL: 'thisisnotanurl',
+      description: 'Music Video for Testing',
+    };
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateTutorialToken(payload);
+    const response = await request(app)
+      .post('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .send(tutorialData)
+      .then((res) => res);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeTruthy();
+    expect(response.body.errors[0].msg).toBe('Invalid value');
+    expect(response.body.errors[0].param).toBe('title');
+  });
+
+  test('Should return 401 error for invalid token', async () => {
+    const tutorialData = {
+      videoURL: 'thisisnotanurl',
+      description: 'Music Video for Testing',
+    };
+    const tutorialToken = 'not a token';
+    const response = await request(app)
+      .post('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .send(tutorialData)
+      .then((res) => res);
+    expect(response.statusCode).toBe(401);
+    expect(response.body.error).toBeTruthy();
   });
 });
