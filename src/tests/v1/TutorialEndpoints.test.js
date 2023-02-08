@@ -138,3 +138,75 @@ describe('Test POST /api/v1/tutorials', () => {
     expect(response.body.error).toBeTruthy();
   });
 });
+
+describe('Test GET /api/v1/tutorials', () => {
+  test('Should find all filtered tutorials', async () => {
+    await Tutorial.create({ title: 'A1', video_url: 'www.google.com/a1', description: 'A1 desc', published_status: 'PUBLISHED' });
+    await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
+    await Tutorial.create({ title: 'B1 test', video_url: 'www.google.com/B1', description: 'B1 one description', published_status: 'PUBLISHED' });
+    await Tutorial.create({ title: 'C1', video_url: 'www.google.com/a1', description: 'CA1 one description', published_status: 'PUBLISHED' });
+
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+
+    // get all
+    let response = await request(app)
+      .get('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.size).toBe(4);
+    expect(response.body.data.tutorials.length).toBe(4);
+
+    // get all with title containing "test"
+    response = await request(app)
+      .get('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .query({ title: 'test' })
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.size).toBe(2);
+    expect(response.body.data.tutorials.length).toBe(2);
+
+    // get all with title containing "test"
+    response = await request(app)
+      .get('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .query({ sort: 'desc', description: 'one' })
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.size).toBe(3);
+    expect(response.body.data.tutorials.length).toBe(3);
+    expect(response.body.data.tutorials[0].title).toBe('C1');
+  });
+
+  test('Should return 400 for wrong order value', async () => {
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+    const response = await request(app)
+      .get('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .query({ sort: 'wrong' })
+      .then((res) => res);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.errors[0].msg).toBe('Invalid value, allowed values are: asc|desc');
+  });
+
+  test('Should return 400 for wrong order value', async () => {
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+    const response = await request(app)
+      .get('/api/v1/tutorials')
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .query({ title: 'no tutorial with this' })
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.size).toBe(0);
+    expect(response.body.data.tutorials.length).toBe(0);
+  });
+});
