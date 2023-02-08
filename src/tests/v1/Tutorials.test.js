@@ -26,17 +26,18 @@ describe('Test GET /api/v1/tutorials/token endpoint.', () => {
   test('Should return a jwt token with expiration', async () => {
     const payload = { user: { id: 1 } };
     const token = await generateJWT(payload);
-    request(app)
+
+    const response = await request(app)
       .get('/api/v1/tutorials/token')
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${token}`)
-      .then((response) => {
-        expect(response.statusCode).toBe(200);
-        const videoToken = response.body.data.token;
-        const decodedToken = jwt.verify(videoToken, process.env.PRIVATE_API_KEY);
-        expect(decodedToken.user.id).toBe(payload.user.id);
-        expect(decodedToken.exp).toBeTruthy();
-      });
+      .then((res) => res);
+
+    expect(response.statusCode).toBe(200);
+    const videoToken = response.body.data.token;
+    const decodedToken = jwt.verify(videoToken, process.env.PRIVATE_API_KEY);
+    expect(decodedToken.user.id).toBe(payload.user.id);
+    expect(decodedToken.exp).toBeTruthy();
   });
 
   test('Should return 401 for not valid token', async () => {
