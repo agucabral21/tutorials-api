@@ -7,13 +7,16 @@ beforeAll(async () => {
   await sequelize.sync();
 });
 
-beforeEach(async () => {
+afterEach(async () => {
   await User.destroy({
     truncate: { cascade: true, restartIdentity: true },
   });
 });
 
 afterAll(async () => {
+  await User.destroy({
+    truncate: { cascade: true, restartIdentity: true },
+  });
   await sequelize.close();
 });
 
@@ -22,8 +25,8 @@ describe('Test for createPost Service.', () => {
     const userData = {
       firstName: 'Agu',
       lastName: 'Cabral',
-      email: 'agucabrl.com',
-      password: 'pasasdsads',
+      email: 'agucabral@gmail.com',
+      password: 'password',
     };
 
     const user = await User.create(userData);
@@ -35,8 +38,8 @@ describe('Test for createPost Service.', () => {
     const userData = {
       firstName: 'Agu',
       lastName: 'Cabral',
-      email: 'agucabrl.com',
-      password: 'pasasdsads',
+      email: 'agucabral@gmail.com',
+      password: 'password',
     };
 
     const user = await User.create(userData);
