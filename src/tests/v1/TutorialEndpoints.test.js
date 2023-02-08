@@ -208,3 +208,44 @@ describe('Test GET /api/v1/tutorials', () => {
     expect(response.statusCode).toBe(204);
   });
 });
+
+describe('Test GET /api/v1/tutorials/:id', () => {
+  test('Should find tutorial by id', async () => {
+    await Tutorial.create({ title: 'A1', video_url: 'www.google.com/a1', description: 'A1 desc', published_status: 'PUBLISHED' });
+    const tutorial = await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
+
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+
+    const response = await request(app)
+      .get(`/api/v1/tutorials/${tutorial.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.title).toBe(tutorial.title);
+  });
+
+  test('Should return 204 for not existing tutorial', async () => {
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+    const response = await request(app)
+      .get(`/api/v1/tutorials/123`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(204);
+  });
+
+  test('Should return 400 for invalid id type', async () => {
+    const payload = { user: { id: 1 } };
+    const tutorialToken = await generateToken(payload);
+    const response = await request(app)
+      .get(`/api/v1/tutorials/asd`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${tutorialToken}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.errors[0].param).toBe('id');
+  });
+});
