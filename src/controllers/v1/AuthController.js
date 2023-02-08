@@ -1,4 +1,4 @@
-const { generateJWT } = require('../../helpers/jwt-generator');
+const { generateToken } = require('../../helpers/jwt-generator');
 const { User } = require('../../services/database');
 const { errorResponse, okResponse } = require('../../helpers/responses');
 
@@ -15,7 +15,7 @@ async function login(req, res) {
 
   const payload = { user: { id: user.id } };
 
-  const token = await generateJWT(payload);
+  const token = await generateToken(payload);
 
   return res.status(200).send(okResponse({ token }));
 }
