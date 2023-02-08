@@ -9,13 +9,16 @@ const { generateJWT } = require('../../helpers/jwt-generator');
 
 dotenv.config();
 
-beforeEach(async () => {
+afterEach(async () => {
   await Tutorial.destroy({
     truncate: { cascade: true, restartIdentity: true },
   });
 });
 
 afterAll(async () => {
+  await Tutorial.destroy({
+    truncate: { cascade: true, restartIdentity: true },
+  });
   await sequelize.close();
 });
 
@@ -27,10 +30,10 @@ describe('Test GET /api/v1/tutorials/token endpoint.', () => {
       .get('/api/v1/tutorials/token')
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${token}`)
-      .then(async (response) => {
+      .then((response) => {
         expect(response.statusCode).toBe(200);
         const videoToken = response.body.data.token;
-        const decodedToken = await jwt.verify(videoToken, process.env.PRIVATE_API_KEY);
+        const decodedToken = jwt.verify(videoToken, process.env.PRIVATE_API_KEY);
         expect(decodedToken.user.id).toBe(payload.user.id);
         expect(decodedToken.exp).toBeTruthy();
       });
