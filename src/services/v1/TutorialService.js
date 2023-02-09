@@ -6,6 +6,11 @@ async function add(data) {
   return tutorial;
 }
 
+async function update(id, data) {
+  const tutorial = await Tutorial.update(data, { where: { id } });
+  return tutorial;
+}
+
 async function findAll(filters, sort = false) {
   const { title, description } = filters;
   const parsedFilters = {};
@@ -48,4 +53,4 @@ async function massDelete() {
   return tutorial;
 }
 
-module.exports = { add, findAll, findById, deleteById, massDelete };
+module.exports = { add, update, findAll, findById, deleteById, massDelete };
