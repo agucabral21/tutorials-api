@@ -318,3 +318,70 @@ describe('Test DELETE /api/v1/tutorials/mass_delete', () => {
     expect(tutorials.length).not.toBe(4);
   });
 });
+
+describe('Test PUT /api/v1/tutorials/:id', () => {
+  test('Should update a tutorial correctly', async () => {
+    const tutorialData = {
+      title: 'Music Tutorial',
+      videoURL: 'www.google.com',
+      description: 'Music Video for Testing',
+      published_status: 'PUBLISHED',
+    };
+    const tutorial = await Tutorial.create(tutorialData);
+    const dataToUpdate = {
+      title: 'Music Tutorial Update',
+    };
+    const payload = { user: { id: 1 } };
+    const token = await generateToken(payload);
+    const response = await request(app)
+      .put(`/api/v1/tutorials/${tutorial.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .send(dataToUpdate)
+      .then((res) => res);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.data.title).toBe(dataToUpdate.title);
+    expect(response.body.data.description).toBe(tutorialData.description);
+  });
+
+  test('Should return 400 for invalid url', async () => {
+    const tutorialData = {
+      title: 'Music Tutorial',
+      videoURL: 'www.google.com',
+      description: 'Music Video for Testing',
+      published_status: 'PUBLISHED',
+    };
+    const tutorial = await Tutorial.create(tutorialData);
+    const dataToUpdate = {
+      videoURL: 'not url',
+    };
+    const payload = { user: { id: 1 } };
+    const token = await generateToken(payload);
+    const response = await request(app)
+      .put(`/api/v1/tutorials/${tutorial.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .send(dataToUpdate)
+      .then((res) => res);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeTruthy();
+    expect(response.body.errors[0].msg).toBe('Invalid value');
+    expect(response.body.errors[0].param).toBe('videoURL');
+  });
+
+  test('Should return 404 for non existing tutorial', async () => {
+    const dataToUpdate = {
+      description: 'Music Video for Testing update',
+    };
+    const payload = { user: { id: 1 } };
+    const token = await generateToken(payload);
+    const response = await request(app)
+      .put(`/api/v1/tutorials/${12345}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .send(dataToUpdate)
+      .then((res) => res);
+
+    expect(response.statusCode).toBe(404);
+  });
+});
