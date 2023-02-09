@@ -14,14 +14,18 @@ async function update(id, data) {
 async function findAll(filters, sort = false) {
   const { title, description } = filters;
   const parsedFilters = {};
+
   if (title) parsedFilters.title = { [Op.like]: `%${title}%` };
   if (description) parsedFilters.description = { [Op.like]: `%${description}%` };
+
   const query = {
     where: { ...parsedFilters },
   };
+
   if (sort) {
     query.order = [['id', sort]];
   }
+
   const tutorial = await Tutorial.findAll(query);
   return tutorial;
 }

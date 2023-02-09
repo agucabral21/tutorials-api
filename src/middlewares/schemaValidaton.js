@@ -1,6 +1,6 @@
 const { checkSchema, validationResult } = require('express-validator');
 
-const schemaValidate = (schema) => async (req, res, next) => {
+const schemaValidation = (schema) => async (req, res, next) => {
   // Run schema validation
   const validations = checkSchema(schema);
   await Promise.all(validations.map((validation) => validation.run(req)));
@@ -17,4 +17,4 @@ const schemaValidate = (schema) => async (req, res, next) => {
   });
 };
 
-module.exports = schemaValidate;
+module.exports = schemaValidation;
