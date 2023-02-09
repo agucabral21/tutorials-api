@@ -46,9 +46,24 @@ async function deleteById(req, res) {
   return res.status(204).send();
 }
 
+async function update(req, res) {
+  const { id } = req.params;
+  const tutorial = await TutorialService.findById(id);
+  if (!tutorial) return res.status(404).send();
+  const { title, videoURL, description } = req.body;
+  const updateData = {
+    title,
+    video_url: videoURL,
+    description,
+  };
+  await TutorialService.update(id, updateData);
+  await tutorial.reload();
+  return res.status(200).send(okResponse(tutorial));
+}
+
 async function massDelete(req, res) {
   await TutorialService.massDelete();
   return res.status(204).send();
 }
 
-module.exports = { getToken, add, findAll, findById, deleteById, massDelete };
+module.exports = { getToken, add, update, findAll, findById, deleteById, massDelete };
