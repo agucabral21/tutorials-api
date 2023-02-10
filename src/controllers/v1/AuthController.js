@@ -12,9 +12,10 @@ async function login(req, res) {
   if (user.password !== password) {
     return res.status(401).send(errorResponse('Incorrect Password.'));
   }
+  const userRoles = await user.getRoles();
+  const roles = userRoles.map((role) => role.name);
 
-  const payload = { user: { id: user.id } };
-
+  const payload = { user: { id: user.id, roles } };
   const token = await generateToken(payload);
 
   return res.status(200).send(okResponse({ token }));

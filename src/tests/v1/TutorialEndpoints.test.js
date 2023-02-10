@@ -9,6 +9,10 @@ const { generateToken, generateTutorialToken } = require('../../helpers/jwt-gene
 
 dotenv.config();
 
+beforeAll(async () => {
+  await sequelize.sync();
+});
+
 afterEach(async () => {
   await Tutorial.destroy({
     truncate: { cascade: true, restartIdentity: true },
@@ -25,7 +29,7 @@ afterAll(async () => {
 
 describe('Test GET /api/v1/tutorials/token endpoint.', () => {
   test('Should return a jwt token with expiration', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const token = await generateToken(payload);
 
     const response = await request(app)
@@ -72,7 +76,7 @@ describe('Test POST /api/v1/tutorials', () => {
       videoURL: 'www.google.com',
       description: 'Music Video for Testing',
     };
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateTutorialToken(payload);
     const response = await request(app)
       .post('/api/v1/tutorials')
@@ -90,7 +94,7 @@ describe('Test POST /api/v1/tutorials', () => {
       videoURL: 'thisisnotanurl',
       description: 'Music Video for Testing',
     };
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateTutorialToken(payload);
     const response = await request(app)
       .post('/api/v1/tutorials')
@@ -109,7 +113,7 @@ describe('Test POST /api/v1/tutorials', () => {
       videoURL: 'thisisnotanurl',
       description: 'Music Video for Testing',
     };
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateTutorialToken(payload);
     const response = await request(app)
       .post('/api/v1/tutorials')
@@ -147,7 +151,7 @@ describe('Test GET /api/v1/tutorials', () => {
     await Tutorial.create({ title: 'B1 test', video_url: 'www.google.com/B1', description: 'B1 one description', published_status: 'PUBLISHED' });
     await Tutorial.create({ title: 'C1', video_url: 'www.google.com/a1', description: 'CA1 one description', published_status: 'PUBLISHED' });
 
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
 
     // get all
@@ -185,7 +189,7 @@ describe('Test GET /api/v1/tutorials', () => {
   });
 
   test('Should return 400 for wrong order value', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
       .get('/api/v1/tutorials')
@@ -198,7 +202,7 @@ describe('Test GET /api/v1/tutorials', () => {
   });
 
   test('Should return 404 for no existing tutorials', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
       .get('/api/v1/tutorials')
@@ -215,7 +219,7 @@ describe('Test GET /api/v1/tutorials/:id', () => {
     await Tutorial.create({ title: 'A1', video_url: 'www.google.com/a1', description: 'A1 desc', published_status: 'PUBLISHED' });
     const tutorial = await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
 
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
 
     const response = await request(app)
@@ -228,7 +232,7 @@ describe('Test GET /api/v1/tutorials/:id', () => {
   });
 
   test('Should return 404 for not existing tutorial', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
       .get(`/api/v1/tutorials/123`)
@@ -239,7 +243,7 @@ describe('Test GET /api/v1/tutorials/:id', () => {
   });
 
   test('Should return 400 for invalid id type', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
       .get(`/api/v1/tutorials/asd`)
@@ -255,7 +259,7 @@ describe('Test DELETE /api/v1/tutorials/:id', () => {
   test('Should return 204 and soft delete tutorial by id', async () => {
     const tutorial = await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
 
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const token = await generateToken(payload);
 
     const response = await request(app)
@@ -269,8 +273,22 @@ describe('Test DELETE /api/v1/tutorials/:id', () => {
     expect(tutorial.deleted_at).not.toBe(null);
   });
 
+  test('Should return 404 for unauthrized role', async () => {
+    const tutorial = await Tutorial.create({ title: 'A2 test', video_url: 'www.google.com/a2', description: 'A2 one description', published_status: 'PUBLISHED' });
+
+    const payload = { user: { id: 1, roles: ['user'] } };
+    const token = await generateToken(payload);
+
+    const response = await request(app)
+      .delete(`/api/v1/tutorials/${tutorial.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .then((res) => res);
+    expect(response.statusCode).toBe(401);
+  });
+
   test('Should return 404 for not existing tutorial', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
       .delete(`/api/v1/tutorials/123`)
@@ -281,7 +299,7 @@ describe('Test DELETE /api/v1/tutorials/:id', () => {
   });
 
   test('Should return 400 for not existing tutorial', async () => {
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const tutorialToken = await generateToken(payload);
     const response = await request(app)
       .delete(`/api/v1/tutorials/asd`)
@@ -303,7 +321,7 @@ describe('Test DELETE /api/v1/tutorials/mass_delete', () => {
 
     expect(tutorials.length).not.toBe(4);
 
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const token = await generateToken(payload);
 
     const response = await request(app)
@@ -331,7 +349,7 @@ describe('Test PUT /api/v1/tutorials/:id', () => {
     const dataToUpdate = {
       title: 'Music Tutorial Update',
     };
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const token = await generateToken(payload);
     const response = await request(app)
       .put(`/api/v1/tutorials/${tutorial.id}`)
@@ -355,7 +373,7 @@ describe('Test PUT /api/v1/tutorials/:id', () => {
     const dataToUpdate = {
       videoURL: 'not url',
     };
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const token = await generateToken(payload);
     const response = await request(app)
       .put(`/api/v1/tutorials/${tutorial.id}`)
@@ -373,7 +391,7 @@ describe('Test PUT /api/v1/tutorials/:id', () => {
     const dataToUpdate = {
       description: 'Music Video for Testing update',
     };
-    const payload = { user: { id: 1 } };
+    const payload = { user: { id: 1, roles: ['admin'] } };
     const token = await generateToken(payload);
     const response = await request(app)
       .put(`/api/v1/tutorials/${12345}`)
